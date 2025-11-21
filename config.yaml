@@ -1,0 +1,54 @@
+# News Frame Analysis Configuration
+
+data:
+  input_path: "data/input/articles.json"
+  processed_path: "data/processed/"
+  random_seed: 42
+  test_size: 0.2
+
+preprocessing:
+  max_length: 512
+  stopwords: ["있다", "하다", "되다", "이다", "것", "수", "등", "및", "위해", "대한"]
+
+unsupervised:
+  # BERTopic settings
+  embedding_model: "jhgan/ko-sroberta-multitask"
+  min_topic_size: 5
+  nr_topics: "auto"
+  calculate_probabilities: true
+
+  # Vectorizer settings
+  min_df: 2
+  max_df: 0.8
+
+supervised:
+  # KoBERT settings
+  model_name: "skt/kobert-base-v1"
+  num_labels: 3  # 진보(0), 중도(1), 보수(2)
+
+  # Training settings
+  num_epochs: 5
+  batch_size: 16
+  learning_rate: 5e-5
+  warmup_steps: 500
+  weight_decay: 0.01
+
+  # Bias thresholds
+  bias_thresholds:
+    progressive: -0.3
+    conservative: 0.3
+
+analysis:
+  # Visualization settings
+  figure_dpi: 300
+  color_scheme: "RdYlBu_r"
+
+  # Statistical tests
+  significance_level: 0.05
+
+output:
+  models_dir: "models/"
+  results_dir: "results/"
+  figures_dir: "results/figures/"
+  dashboard_path: "results/dashboard.html"
+  frame_explorer_path: "results/frame_explorer.html"
