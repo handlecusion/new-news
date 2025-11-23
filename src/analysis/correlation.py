@@ -402,6 +402,8 @@ class IntegratedAnalyzer:
             return int(obj)
         elif isinstance(obj, (np.float64, np.float32)):
             return float(obj)
+        elif isinstance(obj, (np.bool_, bool)):
+            return bool(obj)
         elif isinstance(obj, dict):
             return {k: self._prepare_for_json(v) for k, v in obj.items()}
         elif isinstance(obj, list):
