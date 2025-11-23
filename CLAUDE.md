@@ -66,6 +66,7 @@ news-frame-bias-analysis/
 │   │   └── frame_predictor.py     # Frame-based bias prediction
 │   ├── analysis/
 │   │   ├── correlation.py         # Frame-bias correlation analysis
+│   │   ├── frame_interpreter.py   # Frame interpretation & representative examples
 │   │   └── dashboard.py           # Interactive dashboard creation
 │   └── pipeline.py                # Main execution pipeline
 ├── notebooks/                     # Jupyter notebooks for exploration
@@ -92,6 +93,18 @@ pip install -r requirements.txt
 python src/pipeline.py
 
 # Results will be saved to results/ directory
+```
+
+### Frame Interpretation (Understanding Why Frames Are Distinguished)
+```bash
+# Analyze frame characteristics and extract representative sentences
+python interpret_frames.py
+
+# This will generate results/analysis/frame_interpretation.json with:
+# - Representative articles for each frame
+# - Key sentences that define each frame
+# - Explanation of why frames are distinguished
+# - Frame characteristics (bias tendency, consistency, etc.)
 ```
 
 ### Running Individual Components
@@ -184,6 +197,8 @@ After running the pipeline, expect these outputs:
 
 - `results/frames.json` - Discovered frame information with keywords
 - `results/article_frames.json` - Frame assignments for each article
+- `results/analysis/frame_interpretation.json` - **Frame interpretation with representative sentences**
+- `results/analysis/report.json` - Comprehensive correlation analysis report
 - `results/figures/topic_map.html` - Interactive topic similarity map
 - `results/figures/topic_keywords.html` - Top keywords per frame
 - `results/figures/integrated_analysis.png` - Frame-bias correlation plots

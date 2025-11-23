@@ -1,0 +1,42 @@
+[
+  {
+    "frame_id": 0,
+    "keywords": [
+      "keyword_0"
+    ],
+    "size": 10,
+    "suggested_name": "프레임_0"
+  },
+  {
+    "frame_id": 1,
+    "keywords": [
+      "keyword_1"
+    ],
+    "size": 10,
+    "suggested_name": "프레임_1"
+  },
+  {
+    "frame_id": 2,
+    "keywords": [
+      "keyword_2"
+    ],
+    "size": 10,
+    "suggested_name": "프레임_2"
+  },
+  {
+    "frame_id": 3,
+    "keywords": [
+      "keyword_3"
+    ],
+    "size": 10,
+    "suggested_name": "프레임_3"
+  },
+  {
+    "frame_id": 4,
+    "keywords": [
+      "keyword_4"
+    ],
+    "size": 10,
+    "suggested_name": "프레임_4"
+  }
+]

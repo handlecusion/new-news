@@ -29,6 +29,7 @@ from src.supervised.bias_classifier import BiasClassifier
 from src.supervised.frame_predictor import FrameBasedBiasPredictor
 from src.analysis.correlation import IntegratedAnalyzer
 from src.analysis.dashboard import InteractiveDashboard
+from src.analysis.frame_interpreter import FrameInterpreter
 
 # 설정 파일 로드
 config_path = project_root / "config.yaml"
@@ -67,6 +68,7 @@ class FrameBiasAnalysisPipeline:
         self.frames = None
         self.frame_assignments = None
         self.frame_probs = None
+        self.embeddings = None
         self.bias_classifier = None
         self.frame_predictor = None
 
@@ -125,10 +127,14 @@ class FrameBiasAnalysisPipeline:
             if self.verbose:
                 print(f"✓ 임베딩 생성 완료: shape={embeddings.shape}")
 
+            # 임베딩 저장 (프레임 해석에 사용)
+            self.embeddings = embeddings
+
         except Exception as e:
             print(f"⚠️ 임베딩 생성 실패: {e}")
             print("  sentence-transformers가 설치되어 있는지 확인하세요.")
             embeddings = None
+            self.embeddings = None
 
         return preprocessor, embeddings
 
@@ -327,6 +333,34 @@ class FrameBiasAnalysisPipeline:
 
         return analyzer
 
+    def run_frame_interpretation(self):
+        """프레임 해석 - 프레임별 대표 문장 및 구분 이유 분석"""
+        if self.verbose:
+            print("\n" + "=" * 60)
+            print("4.5단계: 프레임 해석 - 대표 문장 및 구분 이유 분석")
+            print("=" * 60)
+
+        # 해석기 초기화
+        interpreter = FrameInterpreter(
+            self.articles,
+            self.frame_assignments,
+            self.frame_probs,
+            self.frames,
+            self.embeddings
+        )
+
+        # 해석 리포트 생성
+        report = interpreter.create_frame_interpretation_report(
+            save_path=self.output_dir / "analysis" / "frame_interpretation.json",
+            n_examples=5
+        )
+
+        if self.verbose:
+            print(f"\n✓ 프레임 해석 완료")
+            print(f"  - 리포트: {self.output_dir / 'analysis' / 'frame_interpretation.json'}")
+
+        return interpreter
+
     def create_dashboards(self):
         """대시보드 생성"""
         if self.verbose:
@@ -423,6 +457,9 @@ class FrameBiasAnalysisPipeline:
             # 5. 통합 분석
             analyzer = self.run_integrated_analysis()
 
+            # 5.5. 프레임 해석
+            interpreter = self.run_frame_interpretation()
+
             # 6. 대시보드
             dashboard = self.create_dashboards()
 
@@ -440,6 +477,7 @@ class FrameBiasAnalysisPipeline:
             print("  🕸️ frame_network.html - 프레임 관계 네트워크")
             print("  📈 bias_timeline.html - 편향도 타임라인")
             print("  📄 analysis/report.json - 상세 분석 리포트")
+            print("  📖 analysis/frame_interpretation.json - 프레임 해석 리포트 (대표 문장 포함)")
 
             return {
                 "preprocessor": preprocessor,
@@ -447,6 +485,7 @@ class FrameBiasAnalysisPipeline:
                 "extractor": extractor,
                 "frame_predictor": frame_predictor,
                 "analyzer": analyzer,
+                "interpreter": interpreter,
                 "dashboard": dashboard,
             }
 
