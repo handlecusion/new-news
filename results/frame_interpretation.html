@@ -1,0 +1,647 @@
+
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <title>프레임 해석 리포트</title>
+            <style>
+                body {
+                    font-family: 'Malgun Gothic', sans-serif;
+                    max-width: 1200px;
+                    margin: 0 auto;
+                    padding: 20px;
+                    background-color: #f5f5f5;
+                }
+                .header {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    padding: 30px;
+                    border-radius: 10px;
+                    margin-bottom: 30px;
+                    text-align: center;
+                }
+                h1 {
+                    margin: 0;
+                    font-size: 2em;
+                }
+                .summary {
+                    background: white;
+                    padding: 20px;
+                    border-radius: 10px;
+                    margin-bottom: 30px;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                }
+                .frame-card {
+                    background: white;
+                    padding: 25px;
+                    border-radius: 10px;
+                    margin-bottom: 25px;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                    border-left: 5px solid #667eea;
+                }
+                .frame-header {
+                    border-bottom: 2px solid #f0f0f0;
+                    padding-bottom: 15px;
+                    margin-bottom: 20px;
+                }
+                .frame-title {
+                    font-size: 1.5em;
+                    color: #333;
+                    margin: 0 0 10px 0;
+                }
+                .frame-meta {
+                    color: #666;
+                    font-size: 0.9em;
+                }
+                .keywords {
+                    background: #f0f4ff;
+                    padding: 10px 15px;
+                    border-radius: 5px;
+                    margin: 15px 0;
+                }
+                .keywords strong {
+                    color: #667eea;
+                }
+                .characteristics {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                    gap: 15px;
+                    margin: 20px 0;
+                }
+                .char-box {
+                    background: #fafafa;
+                    padding: 15px;
+                    border-radius: 5px;
+                    border: 1px solid #e0e0e0;
+                }
+                .char-label {
+                    font-weight: bold;
+                    color: #555;
+                    font-size: 0.85em;
+                    margin-bottom: 5px;
+                }
+                .char-value {
+                    font-size: 1.1em;
+                    color: #333;
+                }
+                .bias-progressive {
+                    color: #2196F3;
+                    font-weight: bold;
+                }
+                .bias-conservative {
+                    color: #F44336;
+                    font-weight: bold;
+                }
+                .bias-neutral {
+                    color: #4CAF50;
+                    font-weight: bold;
+                }
+                .reasons {
+                    background: #fff8e1;
+                    padding: 15px;
+                    border-radius: 5px;
+                    margin: 15px 0;
+                }
+                .reasons ul {
+                    margin: 10px 0;
+                    padding-left: 20px;
+                }
+                .reasons li {
+                    margin: 8px 0;
+                    line-height: 1.6;
+                }
+                .examples {
+                    margin-top: 20px;
+                }
+                .example-card {
+                    background: #f9f9f9;
+                    padding: 15px;
+                    border-radius: 5px;
+                    margin: 10px 0;
+                    border-left: 3px solid #999;
+                }
+                .example-title {
+                    font-weight: bold;
+                    color: #333;
+                    margin-bottom: 8px;
+                }
+                .example-meta {
+                    color: #666;
+                    font-size: 0.85em;
+                    margin-bottom: 10px;
+                }
+                .key-sentences {
+                    background: white;
+                    padding: 12px;
+                    border-radius: 3px;
+                    margin-top: 8px;
+                }
+                .key-sentences li {
+                    margin: 8px 0;
+                    line-height: 1.6;
+                    color: #555;
+                }
+                .badge {
+                    display: inline-block;
+                    padding: 4px 10px;
+                    border-radius: 12px;
+                    font-size: 0.85em;
+                    font-weight: bold;
+                    margin-left: 10px;
+                }
+                .badge-progressive {
+                    background: #e3f2fd;
+                    color: #1976d2;
+                }
+                .badge-conservative {
+                    background: #ffebee;
+                    color: #c62828;
+                }
+                .badge-neutral {
+                    background: #e8f5e9;
+                    color: #2e7d32;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>🔍 프레임 해석 리포트</h1>
+                <p>각 프레임의 특성과 대표 문장을 통해 프레임 구분 이유를 이해합니다</p>
+            </div>
+        
+            <div class="summary">
+                <h2>📊 전체 요약</h2>
+                <div class="characteristics">
+                    <div class="char-box">
+                        <div class="char-label">총 프레임 수</div>
+                        <div class="char-value">5개</div>
+                    </div>
+                    <div class="char-box">
+                        <div class="char-label">총 기사 수</div>
+                        <div class="char-value">150개</div>
+                    </div>
+                    <div class="char-box">
+                        <div class="char-label">Outliers</div>
+                        <div class="char-value">0개</div>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="frame-card">
+                <div class="frame-header">
+                    <div class="frame-title">
+                        프레임 0: 프레임_0
+                        <span class="badge badge-neutral">중도 성향</span>
+                    </div>
+                    <div class="frame-meta">기사 수: 35개 | 일관성: 중간</div>
+                </div>
+
+                <div class="keywords">
+                    <strong>🔑 주요 키워드:</strong> keyword_0
+                </div>
+
+                <div class="characteristics">
+                    <div class="char-box">
+                        <div class="char-label">평균 편향도</div>
+                        <div class="char-value bias-neutral">-0.003</div>
+                    </div>
+                    <div class="char-box">
+                        <div class="char-label">표준편차</div>
+                        <div class="char-value">±0.493</div>
+                    </div>
+                    <div class="char-box">
+                        <div class="char-label">편향도 범위</div>
+                        <div class="char-value">-0.80 ~ 0.70</div>
+                    </div>
+                </div>
+
+                <div class="reasons">
+                    <strong>💡 프레임 구분 이유:</strong>
+                    <ul>
+            <li>주요 키워드: keyword_0</li>
+<li>편향 성향: 중도 성향</li>
+<li>평균 편향도: -0.00 (±0.49)</li>
+<li>프레임 내 일관성: 중간</li>
+<li>주요 언론사: SBS(6), 한국경제(5), 오마이뉴스(3)</li>
+
+                    </ul>
+                </div>
+
+                <div class="examples">
+                    <strong>📰 대표 기사 예시:</strong>
+            
+                    <div class="example-card">
+                        <div class="example-title">1. 최저임금과 고용률 영향</div>
+                        <div class="example-meta">
+                            📌 KBS | 편향도: -0.10
+                        </div>
+                        <div class="key-sentences">
+                            <strong>핵심 문장:</strong>
+                            <ul>
+                <li>특히 청년층과 고령층의 일자리가 크게 줄어들어 취약계층이 더 큰 피해를 보고 있다</li>
+<li>관련 부처는 최저임금 인상의 영향을 면밀히 모니터링할 예정이다</li>
+
+                            </ul>
+                        </div>
+                    </div>
+                
+                    <div class="example-card">
+                        <div class="example-title">2. 최저임금 9,860원, 소상공인 영향</div>
+                        <div class="example-meta">
+                            📌 MBC | 편향도: -0.30
+                        </div>
+                        <div class="key-sentences">
+                            <strong>핵심 문장:</strong>
+                            <ul>
+                <li>정부의 소상공인 지원 정책과 함께 시행되는 최저임금 인상은 충분히 감당 가능한 수준이다</li>
+<li>일부 어려움은 있겠지만, 노동자의 구매력 증가가 결국 소상공인에게도 도움이 될 것이다</li>
+
+                            </ul>
+                        </div>
+                    </div>
+                
+                    <div class="example-card">
+                        <div class="example-title">3. 내수 경제 개선, 최저임금 효과</div>
+                        <div class="example-meta">
+                            📌 한겨레 | 편향도: -0.70
+                        </div>
+                        <div class="key-sentences">
+                            <strong>핵심 문장:</strong>
+                            <ul>
+                <li>최저임금 인상은 내수 경제 활성화에 기여할 것으로 예상된다</li>
+<li>저소득층의 소비 여력이 늘어나면서 경제 전체에 긍정적인 파급 효과를 가져올 것이다</li>
+
+                            </ul>
+                        </div>
+                    </div>
+                
+                </div>
+            </div>
+            
+            <div class="frame-card">
+                <div class="frame-header">
+                    <div class="frame-title">
+                        프레임 1: 프레임_1
+                        <span class="badge badge-neutral">중도 성향</span>
+                    </div>
+                    <div class="frame-meta">기사 수: 31개 | 일관성: 낮음</div>
+                </div>
+
+                <div class="keywords">
+                    <strong>🔑 주요 키워드:</strong> keyword_1
+                </div>
+
+                <div class="characteristics">
+                    <div class="char-box">
+                        <div class="char-label">평균 편향도</div>
+                        <div class="char-value bias-neutral">-0.079</div>
+                    </div>
+                    <div class="char-box">
+                        <div class="char-label">표준편차</div>
+                        <div class="char-value">±0.523</div>
+                    </div>
+                    <div class="char-box">
+                        <div class="char-label">편향도 범위</div>
+                        <div class="char-value">-0.80 ~ 0.70</div>
+                    </div>
+                </div>
+
+                <div class="reasons">
+                    <strong>💡 프레임 구분 이유:</strong>
+                    <ul>
+            <li>주요 키워드: keyword_1</li>
+<li>편향 성향: 중도 성향</li>
+<li>평균 편향도: -0.08 (±0.52)</li>
+<li>프레임 내 일관성: 낮음</li>
+<li>주요 언론사: 프레시안(6), YTN(4), MBC(4)</li>
+
+                    </ul>
+                </div>
+
+                <div class="examples">
+                    <strong>📰 대표 기사 예시:</strong>
+            
+                    <div class="example-card">
+                        <div class="example-title">1. 내수 경제 변화, 최저임금 효과</div>
+                        <div class="example-meta">
+                            📌 MBC | 편향도: -0.30
+                        </div>
+                        <div class="key-sentences">
+                            <strong>핵심 문장:</strong>
+                            <ul>
+                <li>시장 원리를 무시한 인위적 임금 인상은 경제 전체의 효율성을 떨어뜨린다</li>
+<li>관련 부처는 최저임금 인상의 영향을 면밀히 모니터링할 예정이다</li>
+
+                            </ul>
+                        </div>
+                    </div>
+                
+                    <div class="example-card">
+                        <div class="example-title">2. 자영업자들 '최저임금 부담 평가'</div>
+                        <div class="example-meta">
+                            📌 MBC | 편향도: -0.30
+                        </div>
+                        <div class="key-sentences">
+                            <strong>핵심 문장:</strong>
+                            <ul>
+                <li>최저임금의 급격한 인상은 소상공인과 자영업자들에게 과도한 부담을 주고 있다</li>
+<li>이들의 경영 악화는 결국 경제 전체에 악영향을 미칠 수 있다</li>
+
+                            </ul>
+                        </div>
+                    </div>
+                
+                    <div class="example-card">
+                        <div class="example-title">3. 최저임금과 고용률 우려</div>
+                        <div class="example-meta">
+                            📌 매일경제 | 편향도: 0.60
+                        </div>
+                        <div class="key-sentences">
+                            <strong>핵심 문장:</strong>
+                            <ul>
+                <li>특히 청년층과 고령층의 일자리가 크게 줄어들어 취약계층이 더 큰 피해를 보고 있다</li>
+<li>관련 부처는 최저임금 인상의 영향을 면밀히 모니터링할 예정이다</li>
+
+                            </ul>
+                        </div>
+                    </div>
+                
+                </div>
+            </div>
+            
+            <div class="frame-card">
+                <div class="frame-header">
+                    <div class="frame-title">
+                        프레임 2: 프레임_2
+                        <span class="badge badge-neutral">중도 성향</span>
+                    </div>
+                    <div class="frame-meta">기사 수: 23개 | 일관성: 낮음</div>
+                </div>
+
+                <div class="keywords">
+                    <strong>🔑 주요 키워드:</strong> keyword_2
+                </div>
+
+                <div class="characteristics">
+                    <div class="char-box">
+                        <div class="char-label">평균 편향도</div>
+                        <div class="char-value bias-neutral">0.004</div>
+                    </div>
+                    <div class="char-box">
+                        <div class="char-label">표준편차</div>
+                        <div class="char-value">±0.559</div>
+                    </div>
+                    <div class="char-box">
+                        <div class="char-label">편향도 범위</div>
+                        <div class="char-value">-0.80 ~ 0.70</div>
+                    </div>
+                </div>
+
+                <div class="reasons">
+                    <strong>💡 프레임 구분 이유:</strong>
+                    <ul>
+            <li>주요 키워드: keyword_2</li>
+<li>편향 성향: 중도 성향</li>
+<li>평균 편향도: 0.00 (±0.56)</li>
+<li>프레임 내 일관성: 낮음</li>
+<li>주요 언론사: 프레시안(3), YTN(3), 중앙일보(3)</li>
+
+                    </ul>
+                </div>
+
+                <div class="examples">
+                    <strong>📰 대표 기사 예시:</strong>
+            
+                    <div class="example-card">
+                        <div class="example-title">1. 자영업자들 '최저임금 부담 문제'</div>
+                        <div class="example-meta">
+                            📌 조선일보 | 편향도: 0.70
+                        </div>
+                        <div class="key-sentences">
+                            <strong>핵심 문장:</strong>
+                            <ul>
+                <li>영세 자영업자들은 최저임금 인상으로 인한 인건비 부담 증가로 큰 어려움을 겪고 있다</li>
+<li>관련 부처는 최저임금 인상의 영향을 면밀히 모니터링할 예정이다</li>
+
+                            </ul>
+                        </div>
+                    </div>
+                
+                    <div class="example-card">
+                        <div class="example-title">2. 최저임금 9,860원, 소상공인 위험</div>
+                        <div class="example-meta">
+                            📌 매일경제 | 편향도: 0.60
+                        </div>
+                        <div class="key-sentences">
+                            <strong>핵심 문장:</strong>
+                            <ul>
+                <li>영세 자영업자들은 최저임금 인상으로 인한 인건비 부담 증가로 큰 어려움을 겪고 있다</li>
+<li>관련 부처는 최저임금 인상의 영향을 면밀히 모니터링할 예정이다</li>
+
+                            </ul>
+                        </div>
+                    </div>
+                
+                    <div class="example-card">
+                        <div class="example-title">3. '9,860원' 최저임금, 서민 생활 희망</div>
+                        <div class="example-meta">
+                            📌 프레시안 | 편향도: -0.75
+                        </div>
+                        <div class="key-sentences">
+                            <strong>핵심 문장:</strong>
+                            <ul>
+                <li>이번 최저임금 인상으로 저임금 노동자들의 생활 안정에 도움이 될 것으로 기대된다</li>
+<li>하지만 여전히 OECD 평균에 미치지 못하는 수준으로, 노동자의 인간다운 삶을 위해서는 지속적인 개선이 요구된다</li>
+
+                            </ul>
+                        </div>
+                    </div>
+                
+                </div>
+            </div>
+            
+            <div class="frame-card">
+                <div class="frame-header">
+                    <div class="frame-title">
+                        프레임 3: 프레임_3
+                        <span class="badge badge-neutral">중도 성향</span>
+                    </div>
+                    <div class="frame-meta">기사 수: 28개 | 일관성: 중간</div>
+                </div>
+
+                <div class="keywords">
+                    <strong>🔑 주요 키워드:</strong> keyword_3
+                </div>
+
+                <div class="characteristics">
+                    <div class="char-box">
+                        <div class="char-label">평균 편향도</div>
+                        <div class="char-value bias-neutral">-0.168</div>
+                    </div>
+                    <div class="char-box">
+                        <div class="char-label">표준편차</div>
+                        <div class="char-value">±0.498</div>
+                    </div>
+                    <div class="char-box">
+                        <div class="char-label">편향도 범위</div>
+                        <div class="char-value">-0.80 ~ 0.65</div>
+                    </div>
+                </div>
+
+                <div class="reasons">
+                    <strong>💡 프레임 구분 이유:</strong>
+                    <ul>
+            <li>주요 키워드: keyword_3</li>
+<li>편향 성향: 중도 성향</li>
+<li>평균 편향도: -0.17 (±0.50)</li>
+<li>프레임 내 일관성: 중간</li>
+<li>주요 언론사: JTBC(5), 오마이뉴스(4), 프레시안(3)</li>
+
+                    </ul>
+                </div>
+
+                <div class="examples">
+                    <strong>📰 대표 기사 예시:</strong>
+            
+                    <div class="example-card">
+                        <div class="example-title">1. 최저임금 9,860원, 노동자 생계 평가</div>
+                        <div class="example-meta">
+                            📌 YTN | 편향도: 0.10
+                        </div>
+                        <div class="key-sentences">
+                            <strong>핵심 문장:</strong>
+                            <ul>
+                <li>급격한 최저임금 인상이 오히려 저임금 노동자들의 일자리를 위협할 수 있다는 우려가 제기되고 있다</li>
+<li>시장 원리를 무시한 인위적 임금 인상은 부작용을 초래할 수 있다</li>
+
+                            </ul>
+                        </div>
+                    </div>
+                
+                    <div class="example-card">
+                        <div class="example-title">2. 소상공인 인건비 부담 변화</div>
+                        <div class="example-meta">
+                            📌 KBS | 편향도: -0.10
+                        </div>
+                        <div class="key-sentences">
+                            <strong>핵심 문장:</strong>
+                            <ul>
+                <li>소상공인의 어려움을 최저임금 탓으로만 돌리는 것은 문제의 본질을 회피하는 것이다</li>
+<li>임대료, 카드 수수료 등 다른 구조적 문제 해결이 우선되어야 한다</li>
+
+                            </ul>
+                        </div>
+                    </div>
+                
+                    <div class="example-card">
+                        <div class="example-title">3. 내수 경제 필요, 최저임금 효과</div>
+                        <div class="example-meta">
+                            📌 JTBC | 편향도: -0.40
+                        </div>
+                        <div class="key-sentences">
+                            <strong>핵심 문장:</strong>
+                            <ul>
+                <li>소득 주도 성장의 핵심인 최저임금 인상이 경제 선순환 구조를 만들어낼 것이다</li>
+<li>노동자의 소득 증가가 소비 증가로 이어져 기업 매출 상승에도 도움이 될 것이다</li>
+
+                            </ul>
+                        </div>
+                    </div>
+                
+                </div>
+            </div>
+            
+            <div class="frame-card">
+                <div class="frame-header">
+                    <div class="frame-title">
+                        프레임 4: 프레임_4
+                        <span class="badge badge-neutral">중도 성향</span>
+                    </div>
+                    <div class="frame-meta">기사 수: 33개 | 일관성: 낮음</div>
+                </div>
+
+                <div class="keywords">
+                    <strong>🔑 주요 키워드:</strong> keyword_4
+                </div>
+
+                <div class="characteristics">
+                    <div class="char-box">
+                        <div class="char-label">평균 편향도</div>
+                        <div class="char-value bias-neutral">-0.105</div>
+                    </div>
+                    <div class="char-box">
+                        <div class="char-label">표준편차</div>
+                        <div class="char-value">±0.503</div>
+                    </div>
+                    <div class="char-box">
+                        <div class="char-label">편향도 범위</div>
+                        <div class="char-value">-0.80 ~ 0.65</div>
+                    </div>
+                </div>
+
+                <div class="reasons">
+                    <strong>💡 프레임 구분 이유:</strong>
+                    <ul>
+            <li>주요 키워드: keyword_4</li>
+<li>편향 성향: 중도 성향</li>
+<li>평균 편향도: -0.10 (±0.50)</li>
+<li>프레임 내 일관성: 낮음</li>
+<li>주요 언론사: 경향신문(5), 한국경제(4), SBS(4)</li>
+
+                    </ul>
+                </div>
+
+                <div class="examples">
+                    <strong>📰 대표 기사 예시:</strong>
+            
+                    <div class="example-card">
+                        <div class="example-title">1. 자영업자들 '최저임금 부담 당연'</div>
+                        <div class="example-meta">
+                            📌 JTBC | 편향도: -0.40
+                        </div>
+                        <div class="key-sentences">
+                            <strong>핵심 문장:</strong>
+                            <ul>
+                <li>소상공인의 어려움을 최저임금 탓으로만 돌리는 것은 문제의 본질을 회피하는 것이다</li>
+<li>임대료, 카드 수수료 등 다른 구조적 문제 해결이 우선되어야 한다</li>
+
+                            </ul>
+                        </div>
+                    </div>
+                
+                    <div class="example-card">
+                        <div class="example-title">2. '9,860원' 최저임금, 서민 생활 기대</div>
+                        <div class="example-meta">
+                            📌 한겨레 | 편향도: -0.70
+                        </div>
+                        <div class="key-sentences">
+                            <strong>핵심 문장:</strong>
+                            <ul>
+                <li>최저임금 인상은 노동자들의 기본적인 생계를 보장하는 최소한의 조치다</li>
+<li>물가 상승률을 고려하면 실질 임금은 여전히 부족한 수준이며, 노동자들의 삶의 질 개선을 위해서는 추가적인 인상이 필요하다</li>
+
+                            </ul>
+                        </div>
+                    </div>
+                
+                    <div class="example-card">
+                        <div class="example-title">3. 자영업자들 '최저임금 부담 분석'</div>
+                        <div class="example-meta">
+                            📌 YTN | 편향도: 0.10
+                        </div>
+                        <div class="key-sentences">
+                            <strong>핵심 문장:</strong>
+                            <ul>
+                <li>정부의 소상공인 지원 정책과 함께 시행되는 최저임금 인상은 충분히 감당 가능한 수준이다</li>
+<li>일부 어려움은 있겠지만, 노동자의 구매력 증가가 결국 소상공인에게도 도움이 될 것이다</li>
+
+                            </ul>
+                        </div>
+                    </div>
+                
+                </div>
+            </div>
+            
+        </body>
+        </html>
+        

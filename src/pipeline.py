@@ -365,15 +365,23 @@ class FrameBiasAnalysisPipeline:
         """대시보드 생성"""
         if self.verbose:
             print("\n" + "=" * 60)
-            print("5단계: 인터랙티브 대시보드 생성")
+            print("6단계: 인터랙티브 대시보드 생성")
             print("=" * 60)
+
+        # 프레임 해석 정보 로드
+        frame_interpretation = None
+        interpretation_path = self.output_dir / "analysis" / "frame_interpretation.json"
+        if interpretation_path.exists():
+            with open(interpretation_path, "r", encoding="utf-8") as f:
+                frame_interpretation = json.load(f)
 
         # 대시보드 생성
         dashboard = InteractiveDashboard(
             self.articles,
             self.frames,
             self.frame_assignments,
-            self.frame_probs
+            self.frame_probs,
+            frame_interpretation
         )
 
         # 메인 대시보드
@@ -396,12 +404,18 @@ class FrameBiasAnalysisPipeline:
             save_path=self.output_dir / "bias_timeline.html"
         )
 
+        # 프레임 해석 대시보드
+        dashboard.create_frame_interpretation_dashboard(
+            save_path=self.output_dir / "frame_interpretation.html"
+        )
+
         if self.verbose:
             print("\n✓ 대시보드 생성 완료")
             print(f"  - {self.output_dir}/dashboard.html")
             print(f"  - {self.output_dir}/frame_explorer.html")
             print(f"  - {self.output_dir}/frame_network.html")
             print(f"  - {self.output_dir}/bias_timeline.html")
+            print(f"  - {self.output_dir}/frame_interpretation.html")
 
         return dashboard
 
@@ -476,8 +490,9 @@ class FrameBiasAnalysisPipeline:
             print("  🔍 frame_explorer.html - 프레임별 기사 탐색")
             print("  🕸️ frame_network.html - 프레임 관계 네트워크")
             print("  📈 bias_timeline.html - 편향도 타임라인")
+            print("  📖 frame_interpretation.html - ⭐ 프레임 해석 대시보드 (대표 문장 & 구분 이유)")
             print("  📄 analysis/report.json - 상세 분석 리포트")
-            print("  📖 analysis/frame_interpretation.json - 프레임 해석 리포트 (대표 문장 포함)")
+            print("  📄 analysis/frame_interpretation.json - 프레임 해석 리포트 (JSON)")
 
             return {
                 "preprocessor": preprocessor,

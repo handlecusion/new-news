@@ -22,6 +22,7 @@ class InteractiveDashboard:
         frames: List[Dict],
         frame_assignments: np.ndarray,
         frame_probs: Optional[np.ndarray] = None,
+        frame_interpretation: Optional[Dict] = None,
     ):
         """
         Args:
@@ -29,11 +30,13 @@ class InteractiveDashboard:
             frames: 프레임 정보
             frame_assignments: 프레임 할당
             frame_probs: 프레임 확률
+            frame_interpretation: 프레임 해석 정보
         """
         self.articles = articles
         self.frames = frames
         self.frame_assignments = frame_assignments
         self.frame_probs = frame_probs
+        self.frame_interpretation = frame_interpretation
 
         # 데이터프레임 생성
         self.df = self._create_dataframe()
@@ -537,6 +540,334 @@ class InteractiveDashboard:
             print(f"✓ 편향도 타임라인 저장: {save_path}")
 
         return fig
+
+    def create_frame_interpretation_dashboard(self, save_path: Optional[str] = None):
+        """
+        프레임 해석 대시보드 생성 (대표 문장 및 구분 이유 포함)
+
+        Args:
+            save_path: HTML 파일 저장 경로
+        """
+        if not self.frame_interpretation:
+            print("⚠️ 프레임 해석 정보가 없습니다.")
+            return None
+
+        interpretations = self.frame_interpretation.get("frame_interpretations", [])
+
+        if not interpretations:
+            print("⚠️ 프레임 해석 정보가 비어있습니다.")
+            return None
+
+        # HTML 생성
+        html_content = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <title>프레임 해석 리포트</title>
+            <style>
+                body {
+                    font-family: 'Malgun Gothic', sans-serif;
+                    max-width: 1200px;
+                    margin: 0 auto;
+                    padding: 20px;
+                    background-color: #f5f5f5;
+                }
+                .header {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    padding: 30px;
+                    border-radius: 10px;
+                    margin-bottom: 30px;
+                    text-align: center;
+                }
+                h1 {
+                    margin: 0;
+                    font-size: 2em;
+                }
+                .summary {
+                    background: white;
+                    padding: 20px;
+                    border-radius: 10px;
+                    margin-bottom: 30px;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                }
+                .frame-card {
+                    background: white;
+                    padding: 25px;
+                    border-radius: 10px;
+                    margin-bottom: 25px;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                    border-left: 5px solid #667eea;
+                }
+                .frame-header {
+                    border-bottom: 2px solid #f0f0f0;
+                    padding-bottom: 15px;
+                    margin-bottom: 20px;
+                }
+                .frame-title {
+                    font-size: 1.5em;
+                    color: #333;
+                    margin: 0 0 10px 0;
+                }
+                .frame-meta {
+                    color: #666;
+                    font-size: 0.9em;
+                }
+                .keywords {
+                    background: #f0f4ff;
+                    padding: 10px 15px;
+                    border-radius: 5px;
+                    margin: 15px 0;
+                }
+                .keywords strong {
+                    color: #667eea;
+                }
+                .characteristics {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                    gap: 15px;
+                    margin: 20px 0;
+                }
+                .char-box {
+                    background: #fafafa;
+                    padding: 15px;
+                    border-radius: 5px;
+                    border: 1px solid #e0e0e0;
+                }
+                .char-label {
+                    font-weight: bold;
+                    color: #555;
+                    font-size: 0.85em;
+                    margin-bottom: 5px;
+                }
+                .char-value {
+                    font-size: 1.1em;
+                    color: #333;
+                }
+                .bias-progressive {
+                    color: #2196F3;
+                    font-weight: bold;
+                }
+                .bias-conservative {
+                    color: #F44336;
+                    font-weight: bold;
+                }
+                .bias-neutral {
+                    color: #4CAF50;
+                    font-weight: bold;
+                }
+                .reasons {
+                    background: #fff8e1;
+                    padding: 15px;
+                    border-radius: 5px;
+                    margin: 15px 0;
+                }
+                .reasons ul {
+                    margin: 10px 0;
+                    padding-left: 20px;
+                }
+                .reasons li {
+                    margin: 8px 0;
+                    line-height: 1.6;
+                }
+                .examples {
+                    margin-top: 20px;
+                }
+                .example-card {
+                    background: #f9f9f9;
+                    padding: 15px;
+                    border-radius: 5px;
+                    margin: 10px 0;
+                    border-left: 3px solid #999;
+                }
+                .example-title {
+                    font-weight: bold;
+                    color: #333;
+                    margin-bottom: 8px;
+                }
+                .example-meta {
+                    color: #666;
+                    font-size: 0.85em;
+                    margin-bottom: 10px;
+                }
+                .key-sentences {
+                    background: white;
+                    padding: 12px;
+                    border-radius: 3px;
+                    margin-top: 8px;
+                }
+                .key-sentences li {
+                    margin: 8px 0;
+                    line-height: 1.6;
+                    color: #555;
+                }
+                .badge {
+                    display: inline-block;
+                    padding: 4px 10px;
+                    border-radius: 12px;
+                    font-size: 0.85em;
+                    font-weight: bold;
+                    margin-left: 10px;
+                }
+                .badge-progressive {
+                    background: #e3f2fd;
+                    color: #1976d2;
+                }
+                .badge-conservative {
+                    background: #ffebee;
+                    color: #c62828;
+                }
+                .badge-neutral {
+                    background: #e8f5e9;
+                    color: #2e7d32;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>🔍 프레임 해석 리포트</h1>
+                <p>각 프레임의 특성과 대표 문장을 통해 프레임 구분 이유를 이해합니다</p>
+            </div>
+        """
+
+        # 요약 정보
+        summary = self.frame_interpretation.get("summary", {})
+        html_content += f"""
+            <div class="summary">
+                <h2>📊 전체 요약</h2>
+                <div class="characteristics">
+                    <div class="char-box">
+                        <div class="char-label">총 프레임 수</div>
+                        <div class="char-value">{summary.get('total_frames', 0)}개</div>
+                    </div>
+                    <div class="char-box">
+                        <div class="char-label">총 기사 수</div>
+                        <div class="char-value">{summary.get('total_articles', 0)}개</div>
+                    </div>
+                    <div class="char-box">
+                        <div class="char-label">Outliers</div>
+                        <div class="char-value">{summary.get('outliers', 0)}개</div>
+                    </div>
+                </div>
+            </div>
+        """
+
+        # 각 프레임 해석
+        for interp in interpretations:
+            frame_id = interp.get("frame_id", "")
+            frame_name = interp.get("frame_name", f"프레임 {frame_id}")
+            n_articles = interp.get("n_articles", 0)
+
+            char = interp.get("characteristics", {})
+            keywords = char.get("keywords", [])[:10]
+            bias_stats = char.get("bias_stats", {})
+            tendency = char.get("frame_tendency", "중도 성향")
+            consistency = char.get("consistency", "중간")
+
+            # 성향에 따른 배지 클래스
+            if "진보" in tendency:
+                badge_class = "badge-progressive"
+                tendency_class = "bias-progressive"
+            elif "보수" in tendency:
+                badge_class = "badge-conservative"
+                tendency_class = "bias-conservative"
+            else:
+                badge_class = "badge-neutral"
+                tendency_class = "bias-neutral"
+
+            html_content += f"""
+            <div class="frame-card">
+                <div class="frame-header">
+                    <div class="frame-title">
+                        프레임 {frame_id}: {frame_name}
+                        <span class="badge {badge_class}">{tendency}</span>
+                    </div>
+                    <div class="frame-meta">기사 수: {n_articles}개 | 일관성: {consistency}</div>
+                </div>
+
+                <div class="keywords">
+                    <strong>🔑 주요 키워드:</strong> {', '.join(keywords)}
+                </div>
+
+                <div class="characteristics">
+                    <div class="char-box">
+                        <div class="char-label">평균 편향도</div>
+                        <div class="char-value {tendency_class}">{bias_stats.get('mean', 0):.3f}</div>
+                    </div>
+                    <div class="char-box">
+                        <div class="char-label">표준편차</div>
+                        <div class="char-value">±{bias_stats.get('std', 0):.3f}</div>
+                    </div>
+                    <div class="char-box">
+                        <div class="char-label">편향도 범위</div>
+                        <div class="char-value">{bias_stats.get('min', 0):.2f} ~ {bias_stats.get('max', 0):.2f}</div>
+                    </div>
+                </div>
+
+                <div class="reasons">
+                    <strong>💡 프레임 구분 이유:</strong>
+                    <ul>
+            """
+
+            for reason in interp.get("distinction_reasons", []):
+                html_content += f"<li>{reason}</li>\n"
+
+            html_content += """
+                    </ul>
+                </div>
+
+                <div class="examples">
+                    <strong>📰 대표 기사 예시:</strong>
+            """
+
+            for i, example in enumerate(interp.get("representative_examples", [])[:3], 1):
+                title = example.get("title", "")
+                media = example.get("media_outlet", "")
+                bias_score = example.get("bias_score", 0)
+                key_sentences = example.get("key_sentences", [])
+
+                html_content += f"""
+                    <div class="example-card">
+                        <div class="example-title">{i}. {title}</div>
+                        <div class="example-meta">
+                            📌 {media} | 편향도: {bias_score:.2f}
+                        </div>
+                        <div class="key-sentences">
+                            <strong>핵심 문장:</strong>
+                            <ul>
+                """
+
+                for sent in key_sentences:
+                    html_content += f"<li>{sent}</li>\n"
+
+                html_content += """
+                            </ul>
+                        </div>
+                    </div>
+                """
+
+            html_content += """
+                </div>
+            </div>
+            """
+
+        html_content += """
+        </body>
+        </html>
+        """
+
+        # 저장
+        if save_path:
+            save_path = Path(save_path)
+            save_path.parent.mkdir(parents=True, exist_ok=True)
+
+            with open(save_path, "w", encoding="utf-8") as f:
+                f.write(html_content)
+
+            print(f"✓ 프레임 해석 대시보드 저장: {save_path}")
+
+        return html_content
 
 
 def create_full_dashboard(

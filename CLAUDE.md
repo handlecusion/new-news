@@ -197,13 +197,14 @@ After running the pipeline, expect these outputs:
 
 - `results/frames.json` - Discovered frame information with keywords
 - `results/article_frames.json` - Frame assignments for each article
-- `results/analysis/frame_interpretation.json` - **Frame interpretation with representative sentences**
+- `results/analysis/frame_interpretation.json` - Frame interpretation data (JSON)
 - `results/analysis/report.json` - Comprehensive correlation analysis report
 - `results/figures/topic_map.html` - Interactive topic similarity map
 - `results/figures/topic_keywords.html` - Top keywords per frame
 - `results/figures/integrated_analysis.png` - Frame-bias correlation plots
 - `results/dashboard.html` - Main interactive dashboard
 - `results/frame_explorer.html` - Frame-based article browser
+- **`results/frame_interpretation.html`** - ⭐ **Frame interpretation dashboard with representative sentences and distinction reasons**
 - `models/bias_classifier/` - Trained KoBERT model checkpoints
 
 ## Korean Language Considerations

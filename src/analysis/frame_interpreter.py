@@ -251,9 +251,14 @@ class FrameInterpreter:
             frame_tendency = "중도 성향"
 
         # 프레임 일관성 (편향도 표준편차가 낮으면 일관적)
-        if std_bias < 0.2:
+        # bias_score 범위: -1.0 ~ +1.0 (총 범위 2.0)
+        # 표준편차 기준:
+        #   - 높음: std < 0.3 (편향도가 한 방향으로 집중)
+        #   - 중간: 0.3 ≤ std < 0.5 (일정한 경향성 존재)
+        #   - 낮음: std ≥ 0.5 (편향도가 넓게 분산)
+        if std_bias < 0.3:
             consistency = "높음"
-        elif std_bias < 0.4:
+        elif std_bias < 0.5:
             consistency = "중간"
         else:
             consistency = "낮음"
@@ -412,11 +417,34 @@ class FrameInterpreter:
             save_path.parent.mkdir(parents=True, exist_ok=True)
 
             with open(save_path, "w", encoding="utf-8") as f:
-                json.dump(report, f, ensure_ascii=False, indent=2)
+                # numpy/pandas 객체를 JSON 직렬화 가능한 형태로 변환
+                json_report = self._prepare_for_json(report)
+                json.dump(json_report, f, ensure_ascii=False, indent=2)
 
             print(f"\n✓ 프레임 해석 리포트 저장: {save_path}")
 
         return report
+
+    def _prepare_for_json(self, obj):
+        """JSON 직렬화를 위한 데이터 변환"""
+        if isinstance(obj, pd.DataFrame):
+            return obj.to_dict(orient="records")
+        elif isinstance(obj, pd.Series):
+            return obj.to_dict()
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        elif isinstance(obj, (np.int64, np.int32, np.int16, np.int8)):
+            return int(obj)
+        elif isinstance(obj, (np.float64, np.float32, np.float16)):
+            return float(obj)
+        elif isinstance(obj, (np.bool_, bool)):
+            return bool(obj)
+        elif isinstance(obj, dict):
+            return {k: self._prepare_for_json(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [self._prepare_for_json(item) for item in obj]
+        else:
+            return obj
 
     def compare_frames(self, frame_id1: int, frame_id2: int) -> Dict:
         """
