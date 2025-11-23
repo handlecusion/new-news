@@ -71,13 +71,17 @@ class FrameExtractor:
 
             # 한국어 토크나이저 설정
             if self.language == "korean":
+                mecab_available = False
+
+                # Mecab 시도
                 try:
                     from konlpy.tag import Mecab
-
                     mecab = Mecab()
+                    mecab.morphs("테스트")  # 실제 작동 확인
+                    mecab_available = True
 
                     def korean_tokenizer(text):
-                        """한국어 명사 추출 토크나이저"""
+                        """한국어 명사 추출 토크나이저 (Mecab)"""
                         tokens = []
                         try:
                             pos_tagged = mecab.pos(text)
@@ -88,16 +92,35 @@ class FrameExtractor:
                             tokens = text.split()
                         return tokens
 
-                    self.vectorizer = CountVectorizer(
-                        tokenizer=korean_tokenizer,
-                        min_df=config.get("unsupervised", {}).get("min_df", 2),
-                        max_df=config.get("unsupervised", {}).get("max_df", 0.8),
-                    )
-                except ImportError:
-                    print("⚠️ KoNLPy가 설치되지 않았습니다. 기본 토크나이저를 사용합니다.")
-                    self.vectorizer = CountVectorizer(
-                        min_df=2, max_df=0.8, ngram_range=(1, 2)
-                    )
+                    print("✅ Mecab 형태소 분석기 사용")
+
+                except Exception as e:
+                    print(f"⚠️ Mecab 사용 불가: {str(e)[:50]}")
+                    mecab_available = False
+
+                # Mecab 실패 시 향상된 fallback 토크나이저
+                if not mecab_available:
+                    import re
+
+                    def korean_simple_tokenizer(text):
+                        """한글 전용 간단한 토크나이저"""
+                        # 한글만 추출 (2글자 이상)
+                        tokens = re.findall(r'[가-힣]{2,}', text)
+
+                        # 불용어 제거
+                        stopwords = {"있다", "하다", "되다", "이다", "것", "수", "등", "및", "위해", "대한", "있는", "없는", "같은"}
+                        tokens = [t for t in tokens if t not in stopwords]
+
+                        return tokens
+
+                    print("ℹ️ 간단한 한글 토크나이저 사용 (Mecab 미설치)")
+                    korean_tokenizer = korean_simple_tokenizer
+
+                self.vectorizer = CountVectorizer(
+                    tokenizer=korean_tokenizer,
+                    min_df=config.get("unsupervised", {}).get("min_df", 3),
+                    max_df=config.get("unsupervised", {}).get("max_df", 0.7),
+                )
             else:
                 self.vectorizer = CountVectorizer(
                     min_df=2, max_df=0.8, ngram_range=(1, 2)

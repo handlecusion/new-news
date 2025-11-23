@@ -13,13 +13,13 @@ preprocessing:
 unsupervised:
   # BERTopic settings
   embedding_model: "jhgan/ko-sroberta-multitask"
-  min_topic_size: 5
-  nr_topics: "auto"
+  min_topic_size: 10        # 5 → 10 (더 명확한 클러스터)
+  nr_topics: 10             # auto → 10 (더 세밀한 프레임 구분)
   calculate_probabilities: true
 
   # Vectorizer settings
-  min_df: 2
-  max_df: 0.8
+  min_df: 3                 # 2 → 3 (노이즈 감소)
+  max_df: 0.7               # 0.8 → 0.7 (일반적 단어 제외)
 
 supervised:
   # KoBERT settings
