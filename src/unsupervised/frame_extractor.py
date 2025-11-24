@@ -71,6 +71,14 @@ class FrameExtractor:
 
             # 한국어 토크나이저 설정
             if self.language == "korean":
+                # 언론사명 불용어 리스트 로드
+                media_outlets = set(config.get("preprocessing", {}).get("media_outlets", []))
+                base_stopwords = set(config.get("preprocessing", {}).get(
+                    "stopwords",
+                    ["있다", "하다", "되다", "이다", "것", "수", "등", "및", "위해", "대한"]
+                ))
+                all_stopwords = base_stopwords.union(media_outlets)
+
                 mecab_available = False
 
                 # Mecab 시도
@@ -81,18 +89,25 @@ class FrameExtractor:
                     mecab_available = True
 
                     def korean_tokenizer(text):
-                        """한국어 명사 추출 토크나이저 (Mecab)"""
+                        """한국어 명사 추출 토크나이저 (Mecab) - 언론사명 제외"""
                         tokens = []
                         try:
                             pos_tagged = mecab.pos(text)
-                            tokens = [
-                                word for word, pos in pos_tagged if pos.startswith("N")
-                            ]
+                            for word, pos in pos_tagged:
+                                if pos.startswith("N"):
+                                    # 언론사명 체크 (조사 제거 후)
+                                    is_media = False
+                                    for media in media_outlets:
+                                        if word == media or word.startswith(media):
+                                            is_media = True
+                                            break
+                                    if not is_media and word not in all_stopwords:
+                                        tokens.append(word)
                         except:
-                            tokens = text.split()
+                            tokens = [t for t in text.split() if t not in all_stopwords]
                         return tokens
 
-                    print("✅ Mecab 형태소 분석기 사용")
+                    print("✅ Mecab 형태소 분석기 사용 (언론사명 필터링 포함)")
 
                 except Exception as e:
                     print(f"⚠️ Mecab 사용 불가: {str(e)[:50]}")
@@ -103,17 +118,26 @@ class FrameExtractor:
                     import re
 
                     def korean_simple_tokenizer(text):
-                        """한글 전용 간단한 토크나이저"""
+                        """한글 전용 간단한 토크나이저 - 언론사명 제외"""
                         # 한글만 추출 (2글자 이상)
                         tokens = re.findall(r'[가-힣]{2,}', text)
 
-                        # 불용어 제거
-                        stopwords = {"있다", "하다", "되다", "이다", "것", "수", "등", "및", "위해", "대한", "있는", "없는", "같은"}
-                        tokens = [t for t in tokens if t not in stopwords]
+                        # 불용어 및 언론사명 제거 (조사가 붙은 경우도 체크)
+                        filtered_tokens = []
+                        for token in tokens:
+                            # 언론사명 체크
+                            is_media = False
+                            for media in media_outlets:
+                                if token == media or token.startswith(media):
+                                    is_media = True
+                                    break
 
-                        return tokens
+                            if not is_media and token not in all_stopwords:
+                                filtered_tokens.append(token)
 
-                    print("ℹ️ 간단한 한글 토크나이저 사용 (Mecab 미설치)")
+                        return filtered_tokens
+
+                    print("ℹ️ 간단한 한글 토크나이저 사용 (Mecab 미설치, 언론사명 필터링 포함)")
                     korean_tokenizer = korean_simple_tokenizer
 
                 self.vectorizer = CountVectorizer(
@@ -210,6 +234,9 @@ class FrameExtractor:
         if not self.topic_model:
             raise ValueError("모델이 학습되지 않았습니다.")
 
+        # 언론사명 리스트 로드 (추가 필터링용)
+        media_outlets = set(config.get("preprocessing", {}).get("media_outlets", []))
+
         topic_info = self.topic_model.get_topic_info()
         frames = []
 
@@ -218,8 +245,28 @@ class FrameExtractor:
             if topic_id == -1:  # outliers 제외
                 continue
 
-            # 토픽 키워드 추출
-            keywords = self.topic_model.get_topic(topic_id)[:n_words]
+            # 토픽 키워드 추출 (더 많이 가져와서 필터링)
+            all_keywords = self.topic_model.get_topic(topic_id)
+
+            # 언론사명 필터링 (조사가 붙은 경우도 체크)
+            filtered_keywords = []
+            for word, score in all_keywords:
+                # 빈 문자열 제외
+                if not word or word.strip() == "":
+                    continue
+
+                # 언론사명 체크
+                is_media = False
+                for media in media_outlets:
+                    if word == media or word.startswith(media):
+                        is_media = True
+                        break
+
+                if not is_media:
+                    filtered_keywords.append((word, score))
+
+            # 필터링 후 n_words만큼 선택
+            keywords = filtered_keywords[:n_words]
 
             frame = {
                 "frame_id": int(topic_id),

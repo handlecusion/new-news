@@ -27,12 +27,19 @@ class TextPreprocessor:
         """
         self.use_mecab = use_mecab
         self.mecab = None
-        self.stopwords = set(
-            config.get("preprocessing", {}).get(
-                "stopwords",
-                ["있다", "하다", "되다", "이다", "것", "수", "등", "및", "위해", "대한"]
-            )
+
+        # 기본 불용어 설정
+        base_stopwords = config.get("preprocessing", {}).get(
+            "stopwords",
+            ["있다", "하다", "되다", "이다", "것", "수", "등", "및", "위해", "대한"]
         )
+
+        # 언론사명을 불용어에 추가
+        media_outlets = config.get("preprocessing", {}).get("media_outlets", [])
+
+        # 모든 불용어를 하나의 set으로 결합
+        self.stopwords = set(base_stopwords + media_outlets)
+        print(f"✓ 불용어 리스트 초기화: {len(self.stopwords)}개 (언론사명 {len(media_outlets)}개 포함)")
 
         if use_mecab:
             try:
