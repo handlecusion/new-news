@@ -121,20 +121,19 @@ class NaverNewsCrawler:
             pub_date = self._convert_date(item.get("pubDate", ""))
 
             # 편향 점수 가져오기
-            bias_score = 0.0  # media_bias_map.get(media_outlet, 0.0)
+            bias_score = media_bias_map.get(media_outlet, 0.0)
 
-            # 언론사별 카운터 증가
+            # 언론사별 카운터 관리
             if media_outlet not in media_counter:
                 media_counter[media_outlet] = 0
-            else:
-                media_counter[media_outlet] += 1
 
             # article_id 생성 (언론사별 카운터 사용)
             article_id = f"{''.join(pub_date.split('-'))}_{media_outlet}_{media_counter[media_outlet]:03d}"
 
+            # 카운터 증가
+            media_counter[media_outlet] += 1
+
             url = item.get("link", "")
-            body = None
-            # print(f"parser: {url}")
             body = self.get_description(url)
             if body is not None:
                 description = body
@@ -164,8 +163,6 @@ class NaverNewsCrawler:
 
     def _remove_html_tags(self, text: str) -> str:
         """HTML 태그 제거"""
-        import re
-
         clean = re.compile("<.*?>")
         return re.sub(clean, "", text)
 
@@ -203,12 +200,11 @@ class NaverNewsCrawler:
         예: Mon, 26 Sep 2016 07:50:00 +0900 -> 2016-09-26
         """
         try:
-            from datetime import datetime
-
             # RFC 2822 형식 파싱
             dt = datetime.strptime(rfc_date, "%a, %d %b %Y %H:%M:%S %z")
             return dt.strftime("%Y-%m-%d")
-        except:
+        except (ValueError, AttributeError) as e:
+            print(f"날짜 변환 실패: {rfc_date}, 오늘 날짜로 대체")
             return datetime.now().strftime("%Y-%m-%d")
 
     def crawl_and_save(
@@ -300,18 +296,33 @@ class NaverNewsCrawler:
         print(f"✓ 수집 기간: {article_data['metadata']['collection_period']}")
         print(f"{'=' * 60}")
 
-    def get_description(self, url) -> str | None:
-        response = requests.get(url)
-        if response.status_code != 200:
+    def get_description(self, url) -> Optional[str]:
+        """
+        네이버 뉴스 본문 크롤링
+
+        Args:
+            url: 네이버 뉴스 URL
+
+        Returns:
+            Optional[str]: 본문 텍스트 또는 None
+        """
+        try:
+            response = requests.get(url, timeout=10)
+            if response.status_code != 200:
+                return None
+
+            soup = bs(response.text, "html.parser")
+            body = soup.select_one("#newsct_article")
+            if body:
+                body_text = re.sub(r"\n+", "\n", str(body.text.strip()))
+                return body_text
             return None
-        soup = bs(response.text, "html.parser")
-        body = soup.select_one("#newsct_article")
-        if body:
-            # TODO: article body preprocess
-            # multiline = re.compile("\n+")
-            body = re.sub(r"\n+", "\n", str(body.text.strip()))
-            return body
-        return None
+        except requests.exceptions.Timeout:
+            print(f"본문 크롤링 타임아웃: {url}")
+            return None
+        except Exception as e:
+            print(f"본문 크롤링 실패 ({url}): {e}")
+            return None
 
 
 def main():
