@@ -122,7 +122,7 @@ class NaverNewsCrawler:
             pub_date = self._convert_date(item.get("pubDate", ""))
 
             # 편향 점수 가져오기
-            bias_score = 0.0  # media_bias_map.get(media_outlet, 0.0)
+            bias_score = media_bias_map.get(media_outlet, 0.0)
 
             # 언론사별 카운터 증가
             if media_outlet not in media_counter:

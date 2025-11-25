@@ -146,7 +146,7 @@ class FrameBiasAnalysisPipeline:
 
             # 프레임 정보 추출
             self.frames = extractor.get_frame_info(n_words=15)
-            self.frames = extractor.assign_frame_names(self.frames, method="manual")
+            self.frames = extractor.assign_frame_names(self.frames, method="keyword")
 
             if self.verbose:
                 print(f"\n✓ 발견된 프레임: {len(self.frames)}개")
