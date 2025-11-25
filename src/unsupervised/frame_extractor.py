@@ -4,7 +4,6 @@ BERTopic을 사용하여 뉴스 기사에서 프레임을 자동으로 발견합
 """
 
 import json
-import yaml
 import numpy as np
 import pandas as pd
 from typing import List, Dict, Optional, Tuple, Any
@@ -13,13 +12,8 @@ import warnings
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
-# 설정 파일 로드
-config_path = Path(__file__).parent.parent.parent / "config.yaml"
-if config_path.exists():
-    with open(config_path, "r", encoding="utf-8") as f:
-        config = yaml.safe_load(f)
-else:
-    config = {}
+# 설정 모듈 로드
+from src import config
 
 
 class FrameExtractor:
@@ -41,14 +35,14 @@ class FrameExtractor:
             language: 언어 설정
             verbose: 로그 출력 여부
         """
-        self.embedding_model = embedding_model or config.get("unsupervised", {}).get(
-            "embedding_model", "jhgan/ko-sroberta-multitask"
+        self.embedding_model = embedding_model or config.get(
+            "unsupervised.embedding_model", "jhgan/ko-sroberta-multitask"
         )
-        self.min_topic_size = min_topic_size or config.get("unsupervised", {}).get(
-            "min_topic_size", 5
+        self.min_topic_size = min_topic_size or config.get(
+            "unsupervised.min_topic_size", 5
         )
-        self.nr_topics = nr_topics or config.get("unsupervised", {}).get(
-            "nr_topics", "auto"
+        self.nr_topics = nr_topics or config.get(
+            "unsupervised.nr_topics", "auto"
         )
         self.language = language
         self.verbose = verbose
@@ -72,11 +66,8 @@ class FrameExtractor:
             # 한국어 토크나이저 설정
             if self.language == "korean":
                 # 언론사명 불용어 리스트 로드
-                media_outlets = set(config.get("preprocessing", {}).get("media_outlets", []))
-                base_stopwords = set(config.get("preprocessing", {}).get(
-                    "stopwords",
-                    ["있다", "하다", "되다", "이다", "것", "수", "등", "및", "위해", "대한"]
-                ))
+                media_outlets = set(config.get_media_outlets())
+                base_stopwords = set(config.get_stopwords())
                 all_stopwords = base_stopwords.union(media_outlets)
 
                 mecab_available = False
@@ -142,8 +133,8 @@ class FrameExtractor:
 
                 self.vectorizer = CountVectorizer(
                     tokenizer=korean_tokenizer,
-                    min_df=config.get("unsupervised", {}).get("min_df", 3),
-                    max_df=config.get("unsupervised", {}).get("max_df", 0.7),
+                    min_df=config.get("unsupervised.min_df", 3),
+                    max_df=config.get("unsupervised.max_df", 0.7),
                 )
             else:
                 self.vectorizer = CountVectorizer(
@@ -156,8 +147,8 @@ class FrameExtractor:
                 vectorizer_model=self.vectorizer,
                 min_topic_size=self.min_topic_size,
                 nr_topics=self.nr_topics if self.nr_topics != "auto" else None,
-                calculate_probabilities=config.get("unsupervised", {}).get(
-                    "calculate_probabilities", True
+                calculate_probabilities=config.get(
+                    "unsupervised.calculate_probabilities", True
                 ),
                 verbose=self.verbose,
                 language="english",  # BERTopic 내부 설정
@@ -235,7 +226,7 @@ class FrameExtractor:
             raise ValueError("모델이 학습되지 않았습니다.")
 
         # 언론사명 리스트 로드 (추가 필터링용)
-        media_outlets = set(config.get("preprocessing", {}).get("media_outlets", []))
+        media_outlets = set(config.get_media_outlets())
 
         topic_info = self.topic_model.get_topic_info()
         frames = []
@@ -485,7 +476,7 @@ def extract_frames_from_json(json_path: str, output_dir: str = "results"):
 
 if __name__ == "__main__":
     # 테스트 실행
-    json_path = "data/input/articles.json"
+    json_path = config.get_input_path()
     if Path(json_path).exists():
         extract_frames_from_json(json_path)
     else:

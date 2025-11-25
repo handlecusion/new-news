@@ -15,6 +15,9 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
+# 설정 모듈 로드
+from src import config
+
 # 한글 폰트 설정
 def set_korean_font():
     """한글 폰트 설정"""
@@ -360,20 +363,23 @@ class FrameVisualizer:
 
 
 def visualize_results(
-    json_path: str = "data/input/articles.json",
+    json_path: str = None,
     frames_path: str = "results/frames.json",
     article_frames_path: str = "results/article_frames.json",
-    output_dir: str = "results/figures",
+    output_dir: str = None,
 ):
     """
     저장된 결과를 시각화 (테스트/실행용)
 
     Args:
-        json_path: 원본 데이터 경로
+        json_path: 원본 데이터 경로 (기본값: config.yaml의 data.input_path)
         frames_path: 프레임 정보 경로
         article_frames_path: 기사별 프레임 경로
-        output_dir: 출력 디렉토리
+        output_dir: 출력 디렉토리 (기본값: config.yaml의 output.figures_dir)
     """
+    json_path = json_path or config.get_input_path()
+    output_dir = output_dir or config.get_figures_dir()
+
     # 데이터 로드
     with open(json_path, "r", encoding="utf-8") as f:
         data = json.load(f)

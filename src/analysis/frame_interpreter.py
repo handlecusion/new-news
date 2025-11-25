@@ -13,6 +13,9 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
+# 설정 모듈 로드
+from src import config
+
 
 class FrameInterpreter:
     """프레임 해석 및 대표 문장 추출 클래스"""
@@ -506,22 +509,25 @@ class FrameInterpreter:
 
 
 def interpret_frames(
-    articles_path: str = "data/input/articles.json",
+    articles_path: str = None,
     frames_path: str = "results/frames.json",
     article_frames_path: str = "results/article_frames.json",
-    embeddings_path: Optional[str] = "data/processed/embeddings.npy",
+    embeddings_path: Optional[str] = None,
     output_path: str = "results/analysis/frame_interpretation.json",
 ):
     """
     프레임 해석 실행 (테스트/실행용)
 
     Args:
-        articles_path: 기사 데이터 경로
+        articles_path: 기사 데이터 경로 (기본값: config.yaml의 data.input_path)
         frames_path: 프레임 정보 경로
         article_frames_path: 기사별 프레임 경로
-        embeddings_path: 임베딩 경로
+        embeddings_path: 임베딩 경로 (기본값: config.yaml의 data.processed_path)
         output_path: 출력 경로
     """
+    articles_path = articles_path or config.get_input_path()
+    embeddings_path = embeddings_path or f"{config.get_processed_path()}embeddings.npy"
+
     # 데이터 로드
     with open(articles_path, "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -563,8 +569,9 @@ def interpret_frames(
 
 if __name__ == "__main__":
     # 테스트 실행
+    input_path = config.get_input_path()
     if (
-        Path("data/input/articles.json").exists()
+        Path(input_path).exists()
         and Path("results/frames.json").exists()
         and Path("results/article_frames.json").exists()
     ):

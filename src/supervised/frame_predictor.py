@@ -4,7 +4,6 @@
 """
 
 import json
-import yaml
 import numpy as np
 import pandas as pd
 import pickle
@@ -23,13 +22,8 @@ from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# 설정 파일 로드
-config_path = Path(__file__).parent.parent.parent / "config.yaml"
-if config_path.exists():
-    with open(config_path, "r", encoding="utf-8") as f:
-        config = yaml.safe_load(f)
-else:
-    config = {}
+# 설정 모듈 로드
+from src import config
 
 
 class FrameBasedBiasPredictor:
@@ -505,12 +499,13 @@ def compare_models(
 
 if __name__ == "__main__":
     # 테스트: 프레임 추출 결과가 있는 경우
+    input_path = config.get_input_path()
     if (
-        Path("data/input/articles.json").exists()
+        Path(input_path).exists()
         and Path("results/article_frames.json").exists()
     ):
         # 데이터 로드
-        with open("data/input/articles.json", "r", encoding="utf-8") as f:
+        with open(input_path, "r", encoding="utf-8") as f:
             data = json.load(f)
         articles = data["articles"]
 

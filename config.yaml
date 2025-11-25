@@ -1,7 +1,7 @@
 # News Frame Analysis Configuration
 
 data:
-  input_path: "data/input/articles.json"
+  input_path: "data/input/articles_naver.json"
   processed_path: "data/processed/"
   random_seed: 42
   test_size: 0.2
