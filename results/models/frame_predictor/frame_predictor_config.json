@@ -5,13 +5,9 @@
     "frame_0_prob",
     "frame_1_prob",
     "frame_2_prob",
-    "frame_3_prob",
-    "frame_4_prob",
     "is_frame_0",
     "is_frame_1",
-    "is_frame_2",
-    "is_frame_3",
-    "is_frame_4"
+    "is_frame_2"
   ],
   "bias_thresholds": {
     "progressive": -0.3,
