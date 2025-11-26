@@ -12,14 +12,16 @@ project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
 from src.analysis.frame_interpreter import interpret_frames
+from src import config
 
 
 def main():
     """프레임 해석 실행"""
 
     # 필요한 파일 확인
+    input_path = config.get_input_path()
     required_files = [
-        "data/input/articles.json",
+        input_path,
         "results/frames.json",
         "results/article_frames.json"
     ]

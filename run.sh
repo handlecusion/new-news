@@ -31,8 +31,12 @@ pip install -q --upgrade pip
 echo "📥 필수 패키지 설치 중..."
 pip install -q numpy pandas scikit-learn matplotlib seaborn pyyaml tqdm
 
+# config.yaml에서 입력 파일 경로 읽기
+INPUT_PATH=$(python3 -c "import yaml; print(yaml.safe_load(open('config.yaml'))['data']['input_path'])" 2>/dev/null || echo "data/input/articles.json")
+
 # 샘플 데이터 확인
-if [ ! -f "data/input/articles.json" ]; then
+if [ ! -f "$INPUT_PATH" ]; then
+    echo "📝 입력 파일이 없습니다: $INPUT_PATH"
     echo "📝 샘플 데이터 생성 중..."
     python src/generate_sample_data.py
 fi

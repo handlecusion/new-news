@@ -5,19 +5,21 @@
 """
 
 import json
-import yaml
 from pathlib import Path
 from src.unsupervised.frame_extractor import extract_frames_from_json
+from src import config
 
 
 def check_media_in_keywords():
     """추출된 프레임의 키워드에 언론사명이 있는지 확인"""
 
+    input_path = config.get_input_path()
+
     # 프레임 추출 실행
     print("프레임 추출 시작...")
     try:
         extractor, topics, probs, frames = extract_frames_from_json(
-            "data/input/articles.json",
+            input_path,
             output_dir="results_test"
         )
     except Exception as e:
@@ -25,12 +27,10 @@ def check_media_in_keywords():
         return
 
     # 언론사명 리스트 로드
-    with open("config.yaml", "r", encoding="utf-8") as f:
-        config = yaml.safe_load(f)
-    media_outlets = set(config.get("preprocessing", {}).get("media_outlets", []))
+    media_outlets = set(config.get_media_outlets())
 
     # 실제 데이터에 있는 언론사
-    with open("data/input/articles.json", "r", encoding="utf-8") as f:
+    with open(input_path, "r", encoding="utf-8") as f:
         data = json.load(f)
     actual_media = set([a['media_outlet'] for a in data['articles']])
 

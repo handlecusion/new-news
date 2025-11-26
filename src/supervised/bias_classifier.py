@@ -4,7 +4,6 @@ KoBERT를 사용하여 뉴스 기사의 정치적 편향도를 예측합니다.
 """
 
 import json
-import yaml
 import torch
 import numpy as np
 import pandas as pd
@@ -15,13 +14,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, f1_score, classification_report, confusion_matrix
 from tqdm import tqdm
 
-# 설정 파일 로드
-config_path = Path(__file__).parent.parent.parent / "config.yaml"
-if config_path.exists():
-    with open(config_path, "r", encoding="utf-8") as f:
-        config = yaml.safe_load(f)
-else:
-    config = {}
+# 설정 모듈 로드
+from src import config
 
 
 class BiasDataset(Dataset):
@@ -84,16 +78,16 @@ class BiasClassifier:
             num_labels: 분류 클래스 수 (3: 진보/중도/보수)
             device: 디바이스 (cuda/cpu)
         """
-        self.model_name = model_name or config.get("supervised", {}).get(
-            "model_name", "klue/bert-base"  # KoBERT 대신 KLUE-BERT 사용 (더 안정적)
+        self.model_name = model_name or config.get(
+            "supervised.model_name", "klue/bert-base"  # KoBERT 대신 KLUE-BERT 사용 (더 안정적)
         )
         self.num_labels = num_labels
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
 
         self.tokenizer = None
         self.model = None
-        self.bias_thresholds = config.get("supervised", {}).get(
-            "bias_thresholds",
+        self.bias_thresholds = config.get(
+            "supervised.bias_thresholds",
             {"progressive": -0.3, "conservative": 0.3}
         )
 
@@ -202,11 +196,9 @@ class BiasClassifier:
             raise ValueError("모델이 초기화되지 않았습니다.")
 
         # 하이퍼파라미터 설정
-        epochs = epochs or config.get("supervised", {}).get("num_epochs", 5)
-        batch_size = batch_size or config.get("supervised", {}).get("batch_size", 16)
-        learning_rate = learning_rate or config.get("supervised", {}).get(
-            "learning_rate", 5e-5
-        )
+        epochs = epochs or config.get("supervised.num_epochs", 5)
+        batch_size = batch_size or config.get("supervised.batch_size", 16)
+        learning_rate = learning_rate or config.get("supervised.learning_rate", 5e-5)
 
         print(f"\n=== 학습 설정 ===")
         print(f"에폭 수: {epochs}")
@@ -432,18 +424,21 @@ class BiasClassifier:
 
 
 def train_bias_classifier(
-    json_path: str = "data/input/articles.json",
-    model_save_path: str = "models/bias_classifier",
+    json_path: str = None,
+    model_save_path: str = None,
     test_size: float = 0.2,
 ):
     """
     편향도 분류기 학습 (테스트/실행용)
 
     Args:
-        json_path: 데이터 경로
-        model_save_path: 모델 저장 경로
+        json_path: 데이터 경로 (기본값: config.yaml의 data.input_path)
+        model_save_path: 모델 저장 경로 (기본값: config.yaml의 output.models_dir)
         test_size: 테스트 데이터 비율
     """
+    json_path = json_path or config.get_input_path()
+    model_save_path = model_save_path or f"{config.get_models_dir()}bias_classifier"
+
     # 데이터 로드
     with open(json_path, "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -488,8 +483,9 @@ def train_bias_classifier(
 
 if __name__ == "__main__":
     # 테스트 실행
-    if Path("data/input/articles.json").exists():
+    input_path = config.get_input_path()
+    if Path(input_path).exists():
         train_bias_classifier()
     else:
-        print("⚠️ 데이터 파일을 찾을 수 없습니다.")
+        print(f"⚠️ 데이터 파일을 찾을 수 없습니다: {input_path}")
         print("  먼저 generate_sample_data.py를 실행하세요.")

@@ -30,14 +30,7 @@ from src.supervised.frame_predictor import FrameBasedBiasPredictor
 from src.analysis.correlation import IntegratedAnalyzer
 from src.analysis.dashboard import InteractiveDashboard
 from src.analysis.frame_interpreter import FrameInterpreter
-
-# 설정 파일 로드
-config_path = project_root / "config.yaml"
-if config_path.exists():
-    with open(config_path, "r", encoding="utf-8") as f:
-        config = yaml.safe_load(f)
-else:
-    config = {}
+from src import config
 
 
 class FrameBiasAnalysisPipeline:
@@ -55,12 +48,8 @@ class FrameBiasAnalysisPipeline:
             output_dir: 출력 디렉토리
             verbose: 로그 출력 여부
         """
-        self.data_path = Path(data_path or config.get("data", {}).get(
-            "input_path", "data/input/articles.json"
-        ))
-        self.output_dir = Path(output_dir or config.get("output", {}).get(
-            "results_dir", "results"
-        ))
+        self.data_path = Path(data_path or config.get_input_path())
+        self.output_dir = Path(output_dir or config.get_results_dir())
         self.verbose = verbose
 
         # 데이터 및 결과 저장용
@@ -521,14 +510,14 @@ def main():
     parser.add_argument(
         "--data",
         type=str,
-        default="data/input/articles.json",
-        help="입력 데이터 경로"
+        default=None,
+        help=f"입력 데이터 경로 (기본값: config.yaml의 data.input_path)"
     )
     parser.add_argument(
         "--output",
         type=str,
-        default="results",
-        help="출력 디렉토리"
+        default=None,
+        help=f"출력 디렉토리 (기본값: config.yaml의 output.results_dir)"
     )
     parser.add_argument(
         "--verbose",

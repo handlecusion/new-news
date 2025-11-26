@@ -43,6 +43,7 @@ class NaverNewsCrawler:
         headers = {
             "X-Naver-Client-Id": self.client_id,
             "X-Naver-Client-Secret": self.client_secret,
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
         }
 
         # 쿼리 파라미터 설정
@@ -121,7 +122,7 @@ class NaverNewsCrawler:
             pub_date = self._convert_date(item.get("pubDate", ""))
 
             # 편향 점수 가져오기
-            bias_score = 0.0  # media_bias_map.get(media_outlet, 0.0)
+            bias_score = media_bias_map.get(media_outlet, 0.0)
 
             # 언론사별 카운터 증가
             if media_outlet not in media_counter:
@@ -301,7 +302,10 @@ class NaverNewsCrawler:
         print(f"{'=' * 60}")
 
     def get_description(self, url) -> str | None:
-        response = requests.get(url)
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+        }
+        response = requests.get(url, headers=headers, timeout=10)
         if response.status_code != 200:
             return None
         soup = bs(response.text, "html.parser")
@@ -319,7 +323,7 @@ def main():
     crawler = NaverNewsCrawler()
 
     # 뉴스 크롤링 및 저장
-    query = "최저임금 인상"  # 검색어
+    query = "최저시급 인상"  # 검색어
     crawler.crawl_and_save(
         query=query,
         output_path="data/input/articles_naver.json",

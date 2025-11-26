@@ -12,6 +12,9 @@ from plotly.subplots import make_subplots
 from typing import List, Dict, Optional
 from pathlib import Path
 
+# 설정 모듈 로드
+from src import config
+
 
 class InteractiveDashboard:
     """인터랙티브 대시보드 클래스"""
@@ -871,20 +874,23 @@ class InteractiveDashboard:
 
 
 def create_full_dashboard(
-    articles_path: str = "data/input/articles.json",
+    articles_path: str = None,
     frames_path: str = "results/frames.json",
     article_frames_path: str = "results/article_frames.json",
-    output_dir: str = "results",
+    output_dir: str = None,
 ):
     """
     전체 대시보드 생성 (테스트/실행용)
 
     Args:
-        articles_path: 기사 데이터 경로
+        articles_path: 기사 데이터 경로 (기본값: config.yaml의 data.input_path)
         frames_path: 프레임 정보 경로
         article_frames_path: 기사별 프레임 경로
-        output_dir: 출력 디렉토리
+        output_dir: 출력 디렉토리 (기본값: config.yaml의 output.results_dir)
     """
+    articles_path = articles_path or config.get_input_path()
+    output_dir = output_dir or config.get_results_dir()
+
     # 데이터 로드
     with open(articles_path, "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -934,8 +940,9 @@ def create_full_dashboard(
 
 if __name__ == "__main__":
     # 필요한 파일이 있으면 대시보드 생성
+    input_path = config.get_input_path()
     if (
-        Path("data/input/articles.json").exists() and
+        Path(input_path).exists() and
         Path("results/frames.json").exists() and
         Path("results/article_frames.json").exists()
     ):
